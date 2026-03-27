@@ -746,12 +746,13 @@ body{font-family:'Poppins',sans-serif;background:var(--bg);color:var(--text);min
 <div class="modal-overlay" id="profile-modal">
   <div class="modal-box">
     <h3>👤 Mon Profil</h3>
-    <p>Entrez votre nom pour sauvegarder vos résultats dans le cloud.</p>
+    <p id="profile-subtitle">Entrez votre nom pour sauvegarder vos résultats dans le cloud.</p>
     <input type="text" id="input-prenom" placeholder="Prénom">
     <input type="text" id="input-nom" placeholder="Nom">
     <div class="modal-actions">
       <button class="btn" onclick="saveProfile()">Enregistrer</button>
-      <button class="btn-secondary" onclick="closeProfileModal()">Annuler</button>
+      <button class="btn-secondary" id="btn-cancel-profile" onclick="closeProfileModal()">Annuler</button>
+      <button class="btn-quit" id="btn-logout" style="display:none" onclick="logoutProfile()">🚪 Déconnexion</button>
     </div>
     <div id="profile-status" style="margin-top:10px;font-family:var(--doodle);font-size:0.9em;color:var(--success)"></div>
   </div>
@@ -829,16 +830,29 @@ function updateUserDisplay() {
   }
 }
 
-function showProfileModal() {
+function showProfileModal(forced) {
   document.getElementById('profile-modal').classList.add('show');
+  const cancelBtn = document.getElementById('btn-cancel-profile');
+  const logoutBtn = document.getElementById('btn-logout');
+  const subtitle = document.getElementById('profile-subtitle');
   if (currentUser) {
     document.getElementById('input-prenom').value = currentUser.prenom;
     document.getElementById('input-nom').value = currentUser.nom;
+    cancelBtn.style.display = 'inline-block';
+    logoutBtn.style.display = 'inline-block';
+    subtitle.textContent = 'Modifiez votre profil';
+  } else {
+    document.getElementById('input-prenom').value = '';
+    document.getElementById('input-nom').value = '';
+    cancelBtn.style.display = forced ? 'none' : 'inline-block';
+    logoutBtn.style.display = 'none';
+    subtitle.textContent = 'Connectez-vous pour sauvegarder vos résultats';
   }
   document.getElementById('profile-status').textContent = '';
 }
 
 function closeProfileModal() {
+  if (!currentUser) return;
   document.getElementById('profile-modal').classList.remove('show');
 }
 
@@ -850,9 +864,27 @@ function saveProfile() {
   localStorage.setItem('neuroProfile_user', JSON.stringify(currentUser));
   updateUserDisplay();
   saveAllToFirebase();
+  // Save user info to Firebase
+  const key = getUserKey();
+  if (key) db.ref('neuro_profil/' + key + '/user').set(currentUser);
   document.getElementById('profile-status').textContent = '✅ Profil enregistré !';
   document.getElementById('profile-status').style.color = 'var(--success)';
-  setTimeout(closeProfileModal, 1200);
+  // Load user data from Firebase (in case switching user)
+  loadUserData();
+  setTimeout(() => {
+    document.getElementById('profile-modal').classList.remove('show');
+  }, 1200);
+}
+
+function logoutProfile() {
+  currentUser = null;
+  localStorage.removeItem('neuroProfile_user');
+  ['asrs','aq10','hsp','dys','dabrowski','qi'].forEach(t => localStorage.removeItem('neuroProfile_' + t));
+  updateUserDisplay();
+  renderHomeCards();
+  updateDiagProgress();
+  document.getElementById('profile-modal').classList.remove('show');
+  showProfileModal(true);
 }
 
 function saveToFirebase(testId, data) {
@@ -2565,7 +2597,11 @@ function init() {
   updateUserDisplay();
   renderHomeCards();
   updateDiagProgress();
-  if (currentUser) loadUserData();
+  if (currentUser) {
+    loadUserData();
+  } else {
+    showProfileModal(true);
+  }
 }
 init();
 </script>
