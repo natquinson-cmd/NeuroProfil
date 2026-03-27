@@ -1721,7 +1721,7 @@ function updateDiagProgress() {
   document.getElementById('diag-progress-fill').style.width = pct + '%';
   document.getElementById('diag-status').textContent = done + ' / 6 tests complétés';
   const btn = document.getElementById('diag-home-btn');
-  if (done >= 5) {
+  if (done === 6) {
     btn.disabled = false;
     btn.style.opacity = '1';
     btn.textContent = '🔬 Voir le diagnostic croisé';
@@ -1733,11 +1733,11 @@ function updateDiagProgress() {
 }
 
 function showDiagnostic() {
-  const testIds = ['asrs','aq10','hsp','dys','dabrowski'];
+  const testIds = ['asrs','aq10','hsp','dys','dabrowski','qi'];
   let done = 0;
   testIds.forEach(t => { if (localStorage.getItem('neuroProfile_' + t)) done++; });
-  if (done < 5) {
-    alert('Complétez les 5 tests pour débloquer le diagnostic croisé (' + done + '/5 complétés).');
+  if (done < 6) {
+    alert('Complétez tous les tests pour débloquer le diagnostic croisé (' + done + '/6 complétés).');
     return;
   }
   buildDiagnostic();
