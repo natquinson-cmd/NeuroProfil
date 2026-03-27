@@ -1649,13 +1649,13 @@ function renderHomeCards() {
       <div class="card-desc">${m.desc}</div>
       <div class="card-meta">${m.duration}</div>`;
     if (done) {
-      html += `<div class="card-badge badge-done">✅ Complété</div>
+      html += `<div class="card-badge badge-done">✅ Terminé</div>
         <div class="card-actions">
           <button class="btn-see" onclick="event.stopPropagation();showSavedResults('${tid}')">Voir résultats</button>
           <button class="btn-redo" onclick="event.stopPropagation();redoTest('${tid}')">Refaire</button>
         </div>`;
     } else {
-      html += `<div class="card-badge badge-available">📋 Disponible</div>`;
+      html += `<div class="card-badge badge-available">▶ Commencer</div>`;
     }
     html += `</div>`;
   });
