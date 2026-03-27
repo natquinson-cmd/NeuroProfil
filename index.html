@@ -1748,10 +1748,10 @@ function buildDiagnostic() {
   const convergences = findConvergences(asrs, aq10, hsp, dys, dab, qi);
 
   // Strengths
-  const strengths = findStrengths(asrs, aq10, hsp, dys, dab);
+  const strengths = findStrengths(asrs, aq10, hsp, dys, dab, qi);
 
   // Recommendations
-  const recos = findRecommendations(asrs, aq10, hsp, dys, dab);
+  const recos = findRecommendations(asrs, aq10, hsp, dys, dab, qi);
 
   // Build HTML
   let html = `<h2>🔬 Diagnostic Croisé</h2><p class="results-subtitle">Analyse globale de votre profil neurodivergent</p>`;
@@ -1877,42 +1877,133 @@ function findConvergences(asrs, aq10, hsp, dys, dab, qi) {
   return conv;
 }
 
-function findStrengths(asrs, aq10, hsp, dys, dab) {
+function findStrengths(asrs, aq10, hsp, dys, dab, qi) {
   const str = [];
+  if (qi && qi.iq >= 120) str.push({ icon: '🧠', name: 'Capacités cognitives supérieures (QI ' + qi.iq + ')' });
+  if (qi && qi.iq >= 120 && dab.pcts.INT >= 60) str.push({ icon: '💎', name: 'Haut Potentiel Intellectuel' });
   if (dab.pcts.INT >= 60) str.push({ icon: '💡', name: 'Pensée analytique profonde' });
   if (dab.pcts.IMA >= 60) str.push({ icon: '🌈', name: 'Créativité et imagination' });
   if (dab.pcts.EMO >= 60) str.push({ icon: '💗', name: 'Empathie et intelligence émotionnelle' });
   if (dab.pcts.PSY >= 60) str.push({ icon: '🏃', name: 'Énergie et dynamisme' });
   if (dab.pcts.SEN >= 60) str.push({ icon: '👁️', name: 'Perception sensorielle fine' });
   if (hsp.isHSP) str.push({ icon: '🌿', name: 'Sensibilité intuitive' });
-  if (aq10.score >= 4) str.push({ icon: '🔍', name: 'Attention aux détails' });
-  if (asrs.risk !== 'Risque faible') str.push({ icon: '⚡', name: 'Hyperfocalisation (quand motivé)' });
+  if (aq10.score >= 4) str.push({ icon: '🔍', name: 'Attention aux détails et pensée systématique' });
+  if (asrs.risk !== 'Risque faible') str.push({ icon: '⚡', name: 'Hyperfocalisation (quand passionné)' });
   if (dab.pcts.INT >= 70 && dab.pcts.IMA >= 70) str.push({ icon: '🔮', name: 'Pensée divergente innovante' });
+  if (qi && qi.iq >= 110 && asrs.risk !== 'Risque faible') str.push({ icon: '🚀', name: 'Pensée rapide et multitâche' });
   if (str.length === 0) str.push({ icon: '✨', name: 'Profil équilibré et adaptable' });
   return str;
 }
 
-function findRecommendations(asrs, aq10, hsp, dys, dab) {
+function findRecommendations(asrs, aq10, hsp, dys, dab, qi) {
   const recos = [];
+
+  // === TDAH ===
   if (asrs.risk === 'Risque élevé') {
-    recos.push({ icon: '🩺', title: 'Bilan TDAH recommandé', desc: 'Votre score ASRS est élevé. Consultez un psychiatre ou neuropsychologue spécialisé en TDAH adulte pour une évaluation complète. Des stratégies de gestion (et si nécessaire, un traitement) peuvent significativement améliorer votre quotidien.' });
+    let desc = '<strong>Prochaine étape :</strong> Prenez rendez-vous avec un psychiatre ou neuropsychologue spécialisé en TDAH adulte. Demandez un bilan attentionnel complet (tests CPT, d2, TEA-Ch selon l\'âge).';
+    desc += '<br><br><strong>En attendant le bilan :</strong>';
+    desc += '<br>• Utilisez un <strong>timer visuel</strong> (méthode Pomodoro : 25 min focus / 5 min pause)';
+    desc += '<br>• Créez des <strong>listes quotidiennes courtes</strong> (3 priorités max par jour)';
+    desc += '<br>• Placez vos clés/portefeuille toujours au <strong>même endroit</strong> (routine de rangement)';
+    desc += '<br>• Activité physique <strong>quotidienne</strong> (30 min minimum — course, natation, vélo)';
+    desc += '<br>• Réduisez les <strong>distractions numériques</strong> (mode Focus, bloquer notifications)';
+    if (asrs.hiScore > asrs.hiMax * 0.6) {
+      desc += '<br><br><strong>Pour l\'hyperactivité :</strong> Standing desk, balle anti-stress, marche pendant les appels, sport intense le matin.';
+    }
+    if (asrs.iaScore > asrs.iaMax * 0.6) {
+      desc += '<br><br><strong>Pour l\'inattention :</strong> Travaillez dans un environnement calme, utilisez des écouteurs antibruit, découpez les tâches longues en micro-étapes de 10 min.';
+    }
+    recos.push({ icon: '🩺', title: 'Bilan TDAH recommandé', desc });
+  } else if (asrs.risk === 'Risque modéré') {
+    recos.push({ icon: '⚡', title: 'Traits TDAH à surveiller', desc: '<strong>Votre score est modéré</strong> — pas d\'urgence, mais restez attentif.<br><br><strong>Conseils pratiques :</strong><br>• Tenez un <strong>agenda unique</strong> (papier ou numérique) pour centraliser vos rendez-vous<br>• Pratiquez la <strong>règle des 2 minutes</strong> : si une tâche prend moins de 2 min, faites-la immédiatement<br>• Identifiez vos <strong>heures de pic de concentration</strong> et planifiez le travail complexe à ces moments<br>• Si les difficultés persistent ou s\'aggravent, consultez pour un bilan attentionnel' });
   }
+
+  // === TSA ===
   if (aq10.threshold) {
-    recos.push({ icon: '🧩', title: 'Évaluation TSA recommandée', desc: 'Votre score AQ-10 dépasse le seuil de dépistage. Une évaluation par un Centre Ressources Autisme (CRA) ou un psychologue spécialisé pourrait vous apporter des réponses et un accompagnement adapté.' });
+    recos.push({ icon: '🧩', title: 'Évaluation du spectre autistique recommandée', desc: '<strong>Prochaine étape :</strong> Consultez un Centre Ressources Autisme (CRA) de votre région ou un psychologue/psychiatre formé au diagnostic TSA adulte. Le diagnostic complet inclut le ADOS-2 et l\'ADI-R.<br><br><strong>En attendant :</strong><br>• Identifiez vos <strong>situations de surcharge</strong> (bruit, foule, imprévus) et préparez des stratégies d\'évitement ou de sortie<br>• Créez des <strong>routines structurantes</strong> qui vous rassurent (horaires réguliers, rituels)<br>• Autorisez-vous des <strong>moments de solitude</strong> pour recharger après les interactions sociales<br>• Si vous avez des <strong>intérêts spécifiques</strong>, valorisez-les — ils sont souvent une source de compétence et de bien-être' });
+  } else if (aq10.score >= 4) {
+    recos.push({ icon: '🧩', title: 'Quelques traits autistiques détectés', desc: '<strong>Votre score est sous le seuil</strong>, mais certains traits sont présents.<br><br><strong>Conseils :</strong><br>• Respectez votre <strong>besoin de prévisibilité</strong> — anticipez les changements quand possible<br>• Utilisez des <strong>supports visuels</strong> (schémas, mind maps) pour organiser vos pensées<br>• Communiquez clairement vos besoins à votre entourage (besoin de calme, de routine, etc.)' });
   }
+
+  // === DYS ===
   const dysHighDims = Object.keys(dys.risks).filter(k => dys.risks[k].level === 'Risque élevé');
+  const dysModDims = Object.keys(dys.risks).filter(k => dys.risks[k].level === 'Risque modéré');
   if (dysHighDims.length > 0) {
     const names = dysHighDims.map(k => DYS.dimensions[k].name).join(', ');
-    recos.push({ icon: '📝', title: 'Bilan orthophonique / neuropsychologique', desc: `Des difficultés significatives ont été détectées en : ${names}. Un bilan spécialisé permettrait de confirmer et d'accompagner ces difficultés avec des outils adaptés.` });
+    let desc = `<strong>Prochaine étape :</strong> Consultez un orthophoniste pour un bilan complet. Domaines à risque élevé : <strong>${names}</strong>.`;
+    desc += '<br><br><strong>Aménagements recommandés :</strong>';
+    if (dysHighDims.includes('LEX')) {
+      desc += '<br>• <strong>Dyslexie :</strong> Utilisez une police adaptée (OpenDyslexic), un guide de lecture, des livres audio. Demandez un tiers-temps pour les examens.';
+    }
+    if (dysHighDims.includes('ORT')) {
+      desc += '<br>• <strong>Dysorthographie :</strong> Utilisez un correcteur orthographique avancé (Antidote, MerciApp), dictée vocale, et ne vous jugez pas sur l\'orthographe.';
+    }
+    if (dysHighDims.includes('CAL')) {
+      desc += '<br>• <strong>Dyscalculie :</strong> Utilisez une calculatrice sans culpabilité, des tableaux de référence, des applications visuelles pour les maths (GeoGebra, Photomath).';
+    }
+    if (dysHighDims.includes('ORG')) {
+      desc += '<br>• <strong>Dyspraxie :</strong> Privilégiez le clavier à l\'écriture manuscrite, utilisez des outils de planification visuelle (Trello, post-its), décomposez les gestes complexes en étapes.';
+    }
+    desc += '<br><br><strong>Droits :</strong> En France, les troubles dys sont reconnus comme handicap. Renseignez-vous sur la RQTH (adulte) ou le PAP/PPS (scolarité) pour obtenir des aménagements.';
+    recos.push({ icon: '📝', title: 'Bilan orthophonique recommandé', desc });
+  } else if (dysModDims.length > 0) {
+    const names = dysModDims.map(k => DYS.dimensions[k].name).join(', ');
+    recos.push({ icon: '📝', title: 'Difficultés instrumentales à surveiller', desc: `<strong>Domaines à risque modéré :</strong> ${names}.<br><br><strong>Conseils :</strong><br>• Si ces difficultés impactent votre quotidien professionnel ou scolaire, un bilan orthophonique peut être utile<br>• Utilisez les <strong>outils numériques</strong> comme compensations (correcteur, synthèse vocale, calculatrice)<br>• Ne vous comparez pas aux autres — chacun a ses canaux de traitement privilégiés` });
   }
+
+  // === HSP ===
   if (hsp.isHSP) {
-    recos.push({ icon: '🌿', title: 'Gestion de la sensibilité', desc: 'Votre profil HSP indique une haute sensibilité sensorielle. Aménagez votre environnement (bruit, lumière, charge sociale), pratiquez des techniques de régulation (méditation, nature, art) et respectez vos besoins de récupération.' });
+    let desc = '<strong>Votre sensibilité est une force</strong>, mais elle nécessite un cadre adapté pour s\'exprimer pleinement.';
+    desc += '<br><br><strong>Environnement :</strong>';
+    desc += '<br>• <strong>Bruit :</strong> Investissez dans des bouchons d\'oreilles ou un casque antibruit (ANC) pour les transports et l\'open space';
+    desc += '<br>• <strong>Lumière :</strong> Utilisez des lunettes filtrantes (anti lumière bleue), préférez l\'éclairage indirect et tamisé';
+    desc += '<br>• <strong>Espace :</strong> Aménagez-vous un coin calme chez vous, votre "bulle de décompression"';
+    desc += '<br><br><strong>Gestion quotidienne :</strong>';
+    desc += '<br>• Planifiez des <strong>temps de récupération</strong> après les événements sociaux ou les journées intenses';
+    desc += '<br>• Pratiquez la <strong>cohérence cardiaque</strong> (5 min, 3x/jour) ou la méditation de pleine conscience';
+    desc += '<br>• <strong>Nature :</strong> 20 min de marche en forêt ou dans un parc réduit significativement le cortisol';
+    desc += '<br>• Apprenez à <strong>dire non</strong> — protéger votre énergie n\'est pas de l\'égoïsme';
+    desc += '<br><br><strong>Lecture recommandée :</strong> "Hypersensibles" d\'Elaine Aron (le livre de référence sur le sujet)';
+    recos.push({ icon: '🌿', title: 'Gestion de l\'hypersensibilité', desc });
   }
-  if (dab.pcts.INT >= 70 || dab.pcts.EMO >= 70 || dab.pcts.IMA >= 70) {
-    recos.push({ icon: '✨', title: 'Exploration du Haut Potentiel', desc: 'Vos surexcitabilités élevées sont souvent associées au HPI. Un bilan psychométrique (WAIS-IV) pourrait confirmer ce profil et vous aider à mieux comprendre votre fonctionnement cognitif.' });
+
+  // === HAUT POTENTIEL / DABROWSKI ===
+  const dabHighCount = ['INT','EMO','IMA','PSY','SEN'].filter(d => dab.pcts[d] >= 70).length;
+  if (dabHighCount >= 3 || (qi && qi.iq >= 125)) {
+    let desc = '<strong>Votre profil suggère un fonctionnement de type Haut Potentiel</strong>';
+    if (qi) desc += ' (QI estimé : ' + qi.iq + ')';
+    desc += '.<br><br><strong>Prochaine étape :</strong> Un bilan psychométrique complet (WAIS-IV pour adultes, WISC-V pour enfants) auprès d\'un psychologue spécialisé confirmera ce profil.';
+    desc += '<br><br><strong>Comprendre votre fonctionnement :</strong>';
+    desc += '<br>• <strong>Pensée en arborescence :</strong> Votre cerveau fait des liens multiples simultanément — utilisez des mind maps pour structurer vos idées';
+    desc += '<br>• <strong>Intensité émotionnelle :</strong> Vos réactions ne sont pas "excessives", elles sont proportionnelles à votre sensibilité — acceptez-les';
+    desc += '<br>• <strong>Ennui et frustration :</strong> Si vous vous ennuyez, c\'est que vous avez besoin de plus de stimulation — cherchez des défis intellectuels';
+    desc += '<br>• <strong>Syndrome de l\'imposteur :</strong> Fréquent chez les HPI — vos capacités sont réelles, même si vous les trouvez "normales"';
+    if (qi && qi.iq >= 130) {
+      desc += '<br><br><strong>QI ≥ 130 (Très Supérieur) :</strong> Vous faites partie des ~2% de la population. Cherchez des groupes de pairs intellectuels (associations comme Mensa, ateliers de réflexion, conférences) pour vous sentir "normal" parmi d\'autres cerveaux comme le vôtre.';
+    }
+    desc += '<br><br><strong>Lectures recommandées :</strong> "Trop intelligent pour être heureux ?" de Jeanne Siaud-Facchin, "Je pense trop" de Christel Petitcollin';
+    recos.push({ icon: '✨', title: 'Exploration du Haut Potentiel', desc });
   }
+
+  // === QI spécifique ===
+  if (qi && qi.iq >= 120 && asrs.risk !== 'Risque faible') {
+    recos.push({ icon: '🚀', title: 'Double exceptionnalité QI + TDAH', desc: '<strong>Votre profil combine un QI élevé et des traits TDAH</strong> — c\'est ce qu\'on appelle la "double exceptionnalité" (twice exceptional / 2e).<br><br><strong>Ce que ça implique :</strong><br>• Votre intelligence <strong>compense et masque</strong> partiellement votre TDAH — vous "gérez" en surface mais ça vous coûte beaucoup d\'énergie<br>• Le TDAH peut <strong>sous-estimer votre QI</strong> aux tests (agitation, inattention pendant le test)<br>• Vous pouvez alterner entre des moments de <strong>performance exceptionnelle</strong> (hyperfocus) et des <strong>difficultés déconcertantes</strong> (oublis, procrastination)<br><br><strong>Conseil clé :</strong> Lors du bilan, demandez un professionnel formé à la fois au HPI ET au TDAH. Le diagnostic de l\'un ne doit pas exclure l\'autre.' });
+  }
+
+  // === Bien-être général ===
+  if (hsp.isHSP || dabHighCount >= 2 || asrs.risk !== 'Risque faible') {
+    let desc = '<strong>Votre cerveau fonctionne intensément</strong> — il a besoin d\'un cadre de vie adapté pour s\'épanouir.';
+    desc += '<br><br><strong>Piliers essentiels :</strong>';
+    desc += '<br>• <strong>Sommeil :</strong> 7-9h par nuit, horaires réguliers, écran coupé 1h avant le coucher. Le sommeil est LE facteur n°1 de régulation attentionnelle et émotionnelle.';
+    desc += '<br>• <strong>Alimentation :</strong> Repas réguliers, riche en oméga-3 (poisson gras, noix, lin), éviter les pics glycémiques. La faim aggrave tous les symptômes.';
+    desc += '<br>• <strong>Mouvement :</strong> 30 min d\'activité physique quotidienne réduit de 30% les symptômes TDAH et régule la sensibilité émotionnelle.';
+    desc += '<br>• <strong>Pleine conscience :</strong> 10 min/jour de méditation (apps : Petit Bambou, Headspace) améliore l\'attention et réduit l\'anxiété.';
+    desc += '<br>• <strong>Connexion sociale :</strong> Entretenez des relations avec des personnes qui comprennent votre fonctionnement — la solitude n\'est pas la solution.';
+    recos.push({ icon: '🏥', title: 'Hygiène de vie et bien-être', desc });
+  }
+
   if (recos.length === 0) {
-    recos.push({ icon: '👍', title: 'Pas d\'alerte majeure', desc: 'Vos résultats ne suggèrent pas de besoin urgent d\'évaluation spécialisée. Continuez à explorer votre fonctionnement cognitif et n\'hésitez pas à consulter si des questions persistent.' });
+    recos.push({ icon: '👍', title: 'Pas d\'alerte majeure', desc: '<strong>Vos résultats ne suggèrent pas de besoin urgent d\'évaluation spécialisée.</strong><br><br>Continuez à explorer votre fonctionnement cognitif. Si des questions persistent ou si certaines difficultés impactent votre quotidien, n\'hésitez pas à consulter un psychologue pour un bilan de fonctionnement global.' });
   }
   return recos;
 }
