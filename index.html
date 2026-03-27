@@ -1755,13 +1755,15 @@ function buildDiagnostic() {
   const dab = JSON.parse(localStorage.getItem('neuroProfile_dabrowski'));
   const qi = JSON.parse(localStorage.getItem('neuroProfile_qi'));
 
-  if (!asrs || !aq10 || !hsp || !dys || !dab) return;
+  if (!asrs || !aq10 || !hsp || !dys || !dab || !qi) return;
 
   // Compute global radar axes: Cognition, Attention, Sensorialité, Imagination, Émotions, Social
   const radarLabels = ['Cognition', 'Attention', 'Sensorialité', 'Imagination', 'Émotions', 'Social'];
-  let cognition = Math.round((dab.pcts.INT + (100 - Math.max(dys.dimScores.LEX, dys.dimScores.CAL) / 20 * 100)) / 2);
-  // Factor in QI if available: blend with IQ percentile
-  if (qi && qi.percentile) cognition = Math.round((cognition + qi.percentile) / 2);
+  // Cognition: blend Dabrowski INT, inverse Dys, and QI percentile
+  const dabCog = dab.pcts.INT;
+  const dysCog = 100 - Math.max(dys.dimScores.LEX, dys.dimScores.CAL) / 20 * 100;
+  const qiCog = qi.percentile || 50;
+  let cognition = Math.round((dabCog + dysCog + qiCog) / 3);
   const attention = Math.round(100 - ((asrs.iaScore / asrs.iaMax) * 100));
   const sensorialite = Math.round((hsp.subPct.LST + hsp.subPct.EOE + dab.pcts.SEN) / 3);
   const imagination = Math.round(dab.pcts.IMA);
