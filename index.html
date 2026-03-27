@@ -914,14 +914,42 @@ function loadUserData() {
 }
 
 // ============================================================
-// NAVIGATION
+// NAVIGATION (with browser history support)
 // ============================================================
-function navigateTo(pageId) {
+let currentPage = 'home';
+
+function navigateTo(pageId, pushHistory) {
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
   const target = document.getElementById('page-' + pageId);
   if (target) target.classList.add('active');
   window.scrollTo({ top: 0, behavior: 'smooth' });
+  currentPage = pageId;
+  // Push to browser history (unless triggered by popstate)
+  if (pushHistory !== false) {
+    history.pushState({ page: pageId }, '', '#' + pageId);
+  }
 }
+
+// Handle browser back/forward buttons
+window.addEventListener('popstate', function(e) {
+  if (e.state && e.state.page) {
+    // If we're in a QI test, stop the timer
+    if (currentPage === 'qi-test' && typeof qiTimerI !== 'undefined') {
+      clearInterval(qiTimerI);
+    }
+    // If we're in a Likert test, just navigate back
+    navigateTo(e.state.page, false);
+  } else {
+    // No state = initial page = home
+    if (currentPage === 'qi-test' && typeof qiTimerI !== 'undefined') {
+      clearInterval(qiTimerI);
+    }
+    navigateTo('home', false);
+  }
+});
+
+// Set initial state
+history.replaceState({ page: 'home' }, '', '#home');
 
 // ============================================================
 // TEST DATA
