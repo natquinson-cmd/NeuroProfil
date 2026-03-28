@@ -1391,36 +1391,53 @@ function renderResults(testId, results) {
 }
 
 function renderASRSResults(r) {
+  const iaPct = (r.iaScore/r.iaMax*100).toFixed(0);
+  const hiPct = (r.hiScore/r.hiMax*100).toFixed(0);
   let html = `
+    <div class="result-card">
+      <h3>💡 Comprendre ce test</h3>
+      <p style="font-size:0.9em;color:var(--text2);line-height:1.7">
+        Le TDAH (Trouble Déficit de l'Attention avec ou sans Hyperactivité) touche environ <strong>5% des adultes</strong>.
+        Il se manifeste principalement de deux façons : des <strong>difficultés d'attention</strong> (oublis fréquents, difficulté à se concentrer, tendance à la procrastination)
+        et de l'<strong>hyperactivité/impulsivité</strong> (agitation, difficulté à rester en place, tendance à couper la parole).
+        Chaque personne présente un mélange unique de ces deux dimensions.
+        Ce test de dépistage (ASRS) a été développé avec l'OMS. Il ne pose pas de diagnostic, mais il permet d'identifier si une évaluation approfondie par un professionnel serait pertinente.
+      </p>
+    </div>
     <div class="result-card" style="text-align:center">
       <h3>🎯 Résultat du dépistage (Partie A)</h3>
       <div class="risk-badge ${r.riskClass}">${r.risk}</div>
       <p>Score Partie A : <strong>${r.partACount} / ${r.totalPartA}</strong> critères atteints</p>
-      <p style="font-size:0.85em;color:var(--text2)">
-        ${r.partACount >= 4 ? 'Vous avez atteint le seuil de dépistage. Une évaluation professionnelle est recommandée.' :
-          r.partACount >= 2 ? 'Certains symptômes sont présents. Une évaluation pourrait être utile.' :
-          'Peu de symptômes détectés par le dépistage rapide.'}
+      <p style="font-size:0.9em;color:var(--text2);line-height:1.7;margin-top:10px">
+        ${r.partACount >= 4 ?
+          'Les 6 questions de la Partie A sont les plus prédictives du TDAH chez l\'adulte. Avec <strong>' + r.partACount + ' critères atteints sur 6</strong>, votre profil correspond au seuil de dépistage. Cela ne veut pas dire que vous avez forcément un TDAH, mais qu\'il serait judicieux d\'en parler à un professionnel (psychiatre, neuropsychologue) pour faire un bilan complet. Beaucoup de personnes découvrent leur TDAH à l\'âge adulte et trouvent un vrai soulagement en comprenant enfin leur fonctionnement.' :
+          r.partACount >= 2 ?
+          'Vous avez <strong>' + r.partACount + ' critères sur 6</strong>. Ce n\'est pas suffisant pour atteindre le seuil de dépistage, mais certains symptômes sont bien présents dans votre quotidien. Si ces difficultés vous gênent au travail, dans vos études ou dans votre vie personnelle, une consultation pourrait vous aider à mieux comprendre votre fonctionnement, même sans diagnostic formel de TDAH.' :
+          'Avec <strong>' + r.partACount + ' critère(s) sur 6</strong>, votre profil ne correspond pas au seuil de dépistage du TDAH. Les difficultés que vous avez pu noter sont probablement ponctuelles ou liées à d\'autres facteurs (stress, fatigue, charge mentale). Si toutefois vous ressentez un décalage persistant, n\'hésitez pas à en parler à un professionnel.'}
       </p>
     </div>
     <div class="result-card">
-      <h3>📊 Dimensions TDAH</h3>
+      <h3>📊 Vos deux dimensions</h3>
+      <p style="font-size:0.88em;color:var(--text2);margin-bottom:12px;line-height:1.6">Le TDAH s'exprime à travers deux grandes familles de symptômes. Voici comment ils se répartissent chez vous :</p>
       <div class="bar-chart">
         <div class="bar-row">
           <div class="bar-label">🧠 Inattention</div>
-          <div class="bar-track"><div class="bar-fill" style="width:${(r.iaScore/r.iaMax*100).toFixed(0)}%;background:#3b82f6"></div></div>
+          <div class="bar-track"><div class="bar-fill" style="width:${iaPct}%;background:#3b82f6"></div></div>
           <div class="bar-value">${r.iaScore}/${r.iaMax}</div>
         </div>
         <div class="bar-row">
           <div class="bar-label">⚡ Hyperactivité</div>
-          <div class="bar-track"><div class="bar-fill" style="width:${(r.hiScore/r.hiMax*100).toFixed(0)}%;background:#ef4444"></div></div>
+          <div class="bar-track"><div class="bar-fill" style="width:${hiPct}%;background:#ef4444"></div></div>
           <div class="bar-value">${r.hiScore}/${r.hiMax}</div>
         </div>
       </div>
-      <p style="margin-top:8px">
-        ${r.iaScore > r.hiScore ? '↗️ Profil à prédominance <strong>inattentive</strong>' :
-          r.hiScore > r.iaScore ? '↗️ Profil à prédominance <strong>hyperactive-impulsive</strong>' :
-          '↔️ Profil <strong>mixte</strong> (inattention + hyperactivité)'}
-      </p>
+      <div style="margin-top:12px;padding:12px;background:rgba(0,0,0,0.03);border-radius:10px;border-left:3px solid ${r.iaScore > r.hiScore ? '#3b82f6' : r.hiScore > r.iaScore ? '#ef4444' : '#a855f7'}">
+        ${r.iaScore > r.hiScore ?
+          '<p style="margin-bottom:6px"><strong>↗️ Profil à prédominance inattentive</strong></p><p style="font-size:0.88em;color:var(--text2);line-height:1.6">Votre profil penche davantage vers l\'inattention. Concrètement, cela peut se traduire par : des oublis fréquents, une tendance à rêvasser, des difficultés à terminer ce qu\'on commence, une sensibilité aux distractions, ou encore une difficulté à s\'organiser au quotidien. Ce sous-type est souvent moins visible que le type hyperactif, car il ne "dérange" pas — ce qui explique qu\'il soit souvent diagnostiqué plus tard.</p>' :
+          r.hiScore > r.iaScore ?
+          '<p style="margin-bottom:6px"><strong>↗️ Profil à prédominance hyperactive-impulsive</strong></p><p style="font-size:0.88em;color:var(--text2);line-height:1.6">Votre profil penche davantage vers l\'hyperactivité et l\'impulsivité. Cela peut se manifester par : une agitation intérieure ou physique, le besoin de toujours faire quelque chose, une tendance à couper la parole, des décisions prises sur un coup de tête, ou une difficulté à attendre son tour. Chez l\'adulte, l\'hyperactivité est souvent moins "visible" qu\'elle ne l\'était enfant — elle se transforme en agitation intérieure, impatience, ou besoin permanent de stimulation.</p>' :
+          '<p style="margin-bottom:6px"><strong>↔️ Profil mixte (inattention + hyperactivité)</strong></p><p style="font-size:0.88em;color:var(--text2);line-height:1.6">Vous présentez un mélange équilibré des deux dimensions. Cela signifie que vous pouvez alterner entre des moments de distraction et de rêverie, et des moments d\'agitation ou d\'impulsivité. Ce profil combiné est le plus fréquent chez les adultes avec TDAH. La bonne nouvelle : en comprenant ces deux facettes, vous pouvez mettre en place des stratégies adaptées à chaque situation.</p>'}
+      </div>
     </div>
     <div class="result-card">
       <h3>📋 Détail Partie A (6 questions de dépistage)</h3>`;
@@ -1441,6 +1458,17 @@ function renderAQ10Results(r) {
   const pct = (r.score / r.max * 100).toFixed(0);
   const color = r.threshold ? 'var(--danger)' : 'var(--success)';
   return `
+    <div class="result-card">
+      <h3>💡 Comprendre ce test</h3>
+      <p style="font-size:0.9em;color:var(--text2);line-height:1.7">
+        Le spectre autistique (TSA) est une façon différente de percevoir et d'interagir avec le monde.
+        Il ne s'agit pas d'une maladie, mais d'un <strong>fonctionnement neurologique particulier</strong> qui touche environ 1 à 2% de la population.
+        Les personnes autistes peuvent avoir des <strong>centres d'intérêt très intenses</strong>, une <strong>sensibilité sensorielle</strong> différente,
+        et une façon de communiquer qui ne correspond pas toujours aux codes sociaux habituels.
+        L'AQ-10 est un test de dépistage rapide en 10 questions. Il repère certains traits fréquemment associés à l'autisme,
+        mais seule une évaluation complète par un spécialiste (neuropsychologue, psychiatre spécialisé) peut poser un diagnostic.
+      </p>
+    </div>
     <div class="result-card" style="text-align:center">
       <h3>🎯 Score AQ-10</h3>
       <div class="gauge-container">
@@ -1453,10 +1481,10 @@ function renderAQ10Results(r) {
         ${r.threshold ? 'Évaluation spécialisée recommandée' : 'Sous le seuil de dépistage'}
       </div>
       <p style="margin-top:10px">Le seuil de dépistage est de <strong>6/10</strong>.</p>
-      <p style="font-size:0.85em;color:var(--text2)">
+      <p style="font-size:0.9em;color:var(--text2);line-height:1.7;margin-top:10px">
         ${r.threshold ?
-          'Votre score suggère la présence de traits associés au spectre autistique. Une évaluation complète par un spécialiste pourrait être bénéfique.' :
-          'Votre score est en-dessous du seuil de dépistage. Cela ne signifie pas l\'absence de traits autistiques, mais qu\'un dépistage approfondi n\'est pas prioritaire sur la base de ce test rapide.'}
+          'Avec un score de <strong>' + r.score + '/10</strong>, plusieurs traits associés au spectre autistique semblent présents dans votre fonctionnement quotidien. Cela peut se traduire par exemple par une difficulté à décoder les intentions des autres, un besoin de routines, une sensibilité aux environnements bruyants ou stimulants, ou encore des passions très intenses. <strong>Ce score ne signifie pas que vous êtes autiste</strong>, mais il suggère qu\'une évaluation approfondie par un professionnel spécialisé pourrait vous aider à mieux comprendre votre fonctionnement. Beaucoup d\'adultes découvrent tardivement qu\'ils sont sur le spectre, et cette découverte est souvent un soulagement qui permet de mieux se connaître.' :
+          'Avec un score de <strong>' + r.score + '/10</strong>, votre profil se situe en dessous du seuil de dépistage. Cela signifie que les traits autistiques repérés par ce test rapide sont peu nombreux ou peu marqués dans votre quotidien. Toutefois, ce test ne couvre pas tous les aspects de l\'autisme — il n\'évalue que 10 dimensions parmi beaucoup d\'autres. Si vous ressentez un décalage persistant avec les autres, des difficultés dans les interactions sociales, ou une hypersensibilité sensorielle qui vous gêne, une évaluation complète reste toujours possible et utile.'}
       </p>
     </div>
     <div class="result-card">
@@ -1468,6 +1496,9 @@ function renderAQ10Results(r) {
           <div class="bar-value">${r.score}/${r.max}</div>
         </div>
       </div>
+      <p style="font-size:0.88em;color:var(--text2);margin-top:10px;line-height:1.6">
+        Chaque point correspond à une réponse indiquant un trait fréquemment observé chez les personnes autistes : préférence pour les activités solitaires, difficulté avec les conversations de groupe, attention aux détails, difficulté à interpréter les émotions des autres, etc.
+      </p>
     </div>`;
 }
 
@@ -1477,6 +1508,15 @@ function renderHSPResults(r) {
   const subNames = { EOE: 'Facilité d\'excitation', AES: 'Sensibilité esthétique', LST: 'Seuil sensoriel bas' };
   const subColors = { EOE: '#6c5ce7', AES: '#00b894', LST: '#e17055' };
   let html = `
+    <div class="result-card">
+      <h3>💡 Comprendre ce test</h3>
+      <p style="font-size:0.9em;color:var(--text2);line-height:1.7">
+        L'hypersensibilité (ou haute sensibilité) n'est <strong>ni une maladie, ni un trouble</strong> — c'est un trait de tempérament présent chez environ <strong>15 à 20% de la population</strong>.
+        Les personnes hautement sensibles perçoivent leur environnement de manière plus intense : les sons, les lumières, les émotions des autres, les ambiances...
+        Elles traitent les informations plus en profondeur, ce qui est à la fois une <strong>grande richesse</strong> (empathie, créativité, attention aux détails) et une source potentielle de <strong>fatigue ou de surcharge</strong>.
+        Ce test, basé sur l'échelle HSP d'Elaine Aron, évalue votre sensibilité à travers 3 dimensions complémentaires.
+      </p>
+    </div>
     <div class="result-card" style="text-align:center">
       <h3>🌿 Niveau de sensibilité</h3>
       <div class="score-big" style="color:${levelColor}">${r.total}</div>
@@ -1484,13 +1524,17 @@ function renderHSPResults(r) {
       <div class="risk-badge" style="background:rgba(108,92,231,0.1);color:${levelColor};border:2px dashed ${levelColor}">
         Sensibilité ${r.level}
       </div>
-      <p style="margin-top:8px;font-size:0.9em;color:var(--text2)">
-        ${r.countHigh} items sur 27 à intensité élevée (≥ 4).
-        ${r.isHSP ? 'Vous présentez probablement le trait HSP (Highly Sensitive Person).' : 'Votre profil ne correspond pas au seuil HSP classique.'}
+      <p style="margin-top:10px;font-size:0.9em;color:var(--text2);line-height:1.7;text-align:left">
+        ${r.isHSP ?
+          'Avec <strong>' + r.countHigh + ' items sur 27 à intensité élevée</strong>, votre profil correspond à celui d\'une personne hautement sensible (HSP). Cela signifie que votre système nerveux capte et traite davantage d\'informations que la moyenne. Vous êtes probablement très réceptif(ve) aux ambiances, aux émotions des autres, et aux détails que beaucoup ne remarquent pas. C\'est une qualité précieuse — mais qui demande aussi de savoir se protéger de la surstimulation. Prévoir des moments de calme, limiter les environnements trop stimulants et s\'écouter sont des clés essentielles pour bien vivre sa haute sensibilité.' :
+          r.level === 'Modérée' ?
+          'Avec <strong>' + r.countHigh + ' items sur 27 à intensité élevée</strong>, votre sensibilité se situe dans une zone intermédiaire. Vous n\'êtes probablement pas "hypersensible" au sens classique du terme, mais vous êtes clairement plus réceptif(ve) que la moyenne dans certaines situations. Certains environnements ou émotions vous touchent davantage, tandis que d\'autres vous laissent relativement serein(e). Identifiez vos "zones sensibles" pour mieux anticiper les moments de fatigue.' :
+          'Votre profil ne correspond pas au seuil de haute sensibilité classique. Cela signifie que votre système nerveux filtre naturellement une bonne partie des stimulations environnantes. Vous êtes probablement à l\'aise dans des environnements animés ou bruyants sans ressentir de surcharge particulière. C\'est un atout dans de nombreuses situations, même si cela peut parfois rendre plus difficile la compréhension de personnes plus sensibles autour de vous.'}
       </p>
     </div>
     <div class="result-card">
-      <h3>📊 Sous-dimensions HSP</h3>
+      <h3>📊 Vos 3 facettes de sensibilité</h3>
+      <p style="font-size:0.88em;color:var(--text2);margin-bottom:12px;line-height:1.6">La haute sensibilité n'est pas un bloc unique — elle s'exprime différemment selon les personnes. Voici vos 3 dimensions :</p>
       <div class="bar-chart">`;
   ['EOE','AES','LST'].forEach(k => {
     html += `<div class="bar-row">
@@ -1500,21 +1544,59 @@ function renderHSPResults(r) {
     </div>`;
   });
   html += `</div>
-      <p style="font-size:0.85em;color:var(--text2);margin-top:8px">
-        <strong>EOE</strong> : Sensibilité à la surstimulation et surcharge cognitive<br>
-        <strong>AES</strong> : Appréciation esthétique et émotionnelle des arts et de la beauté<br>
-        <strong>LST</strong> : Réactivité aux stimuli sensoriels (bruit, lumière, douleur)
-      </p>
+      <div style="margin-top:12px;display:grid;gap:10px">
+        <div style="padding:10px;background:rgba(108,92,231,0.06);border-radius:10px;border-left:3px solid #6c5ce7">
+          <strong style="color:#6c5ce7">Facilité d'excitation (EOE)</strong> — ${r.subPct.EOE >= 60 ? 'Score élevé' : r.subPct.EOE >= 35 ? 'Score modéré' : 'Score faible'}
+          <p style="font-size:0.85em;color:var(--text2);margin-top:4px;line-height:1.6">
+            ${r.subPct.EOE >= 60 ?
+              'Vous êtes facilement submergé(e) quand il y a trop de choses à gérer en même temps. Les journées très remplies, les environnements agités ou les changements brutaux peuvent vous fatiguer rapidement. Ce n\'est pas de la faiblesse : votre cerveau traite simplement plus d\'informations en parallèle.' :
+              r.subPct.EOE >= 35 ?
+              'Vous gérez plutôt bien la plupart des situations, mais certaines situations de surcharge (deadline, foule, multitâche intense) peuvent vous atteindre plus qu\'elles n\'atteignent d\'autres personnes.' :
+              'La surstimulation ne vous pose pas de problème majeur. Vous arrivez généralement à rester concentré(e) et serein(e) même dans des situations intenses ou agitées.'}
+          </p>
+        </div>
+        <div style="padding:10px;background:rgba(0,184,148,0.06);border-radius:10px;border-left:3px solid #00b894">
+          <strong style="color:#00b894">Sensibilité esthétique (AES)</strong> — ${r.subPct.AES >= 60 ? 'Score élevé' : r.subPct.AES >= 35 ? 'Score modéré' : 'Score faible'}
+          <p style="font-size:0.85em;color:var(--text2);margin-top:4px;line-height:1.6">
+            ${r.subPct.AES >= 60 ?
+              'La beauté, l\'art, la musique et la nature vous touchent profondément. Vous pouvez être ému(e) aux larmes par un morceau de musique, un paysage ou une oeuvre d\'art. Cette sensibilité esthétique est un vrai cadeau — elle enrichit considérablement votre vie intérieure et votre capacité à apprécier le monde.' :
+              r.subPct.AES >= 35 ?
+              'Vous appréciez la beauté et l\'art, mais de façon mesurée. Certaines oeuvres ou moments de beauté vous touchent plus que d\'autres, sans que cela soit systématiquement intense.' :
+              'L\'esthétique et l\'art ne provoquent pas chez vous de réactions émotionnelles particulièrement intenses. Vous les appréciez, mais ils ne vous bouleversent pas.'}
+          </p>
+        </div>
+        <div style="padding:10px;background:rgba(225,112,85,0.06);border-radius:10px;border-left:3px solid #e17055">
+          <strong style="color:#e17055">Seuil sensoriel bas (LST)</strong> — ${r.subPct.LST >= 60 ? 'Score élevé' : r.subPct.LST >= 35 ? 'Score modéré' : 'Score faible'}
+          <p style="font-size:0.85em;color:var(--text2);margin-top:4px;line-height:1.6">
+            ${r.subPct.LST >= 60 ?
+              'Vos sens sont particulièrement réactifs. Les bruits forts, les lumières vives, les textures désagréables ou certaines odeurs peuvent vous déranger plus que la plupart des gens. C\'est lié à un seuil de détection sensoriel plus bas que la moyenne — vous percevez ce que d\'autres ne remarquent même pas. Des écouteurs anti-bruit, un éclairage tamisé ou des vêtements confortables peuvent vraiment faire la différence.' :
+              r.subPct.LST >= 35 ?
+              'Vous avez une sensibilité sensorielle modérée. Certains stimuli (bruits, lumières, odeurs) peuvent vous gêner dans des situations spécifiques, mais globalement vous gérez bien les environnements sensoriels variés.' :
+              'Votre seuil sensoriel est plutôt élevé. Les bruits, lumières et autres stimulations physiques ne vous dérangent que rarement. Vous êtes à l\'aise dans la plupart des environnements.'}
+          </p>
+        </div>
+      </div>
     </div>`;
   return html;
 }
 
 function renderDYSResults(r) {
-  let html = `<div class="result-card"><h3>📊 Résultats par domaine</h3><div class="bar-chart">`;
+  let html = `
+    <div class="result-card">
+      <h3>💡 Comprendre ce test</h3>
+      <p style="font-size:0.9em;color:var(--text2);line-height:1.7">
+        Les troubles "dys" (dyslexie, dysorthographie, dyscalculie, dyspraxie) sont des <strong>troubles des apprentissages</strong> d'origine neurologique.
+        Ils ne sont pas liés à l'intelligence — on peut être très intelligent et avoir une dyslexie.
+        Ils concernent des <strong>compétences spécifiques</strong> : lire, écrire, compter, s'organiser dans l'espace ou coordonner ses gestes.
+        On estime que <strong>6 à 8% de la population</strong> est concernée, souvent sans le savoir.
+        Ce test explore 4 domaines. Un score élevé ne signifie pas que vous avez un trouble dys — seul un bilan complet (orthophoniste, neuropsychologue, psychomotricien) peut le confirmer.
+        Mais il peut vous aider à identifier des zones de difficulté qui méritent attention.
+      </p>
+    </div>`;
+  html += `<div class="result-card"><h3>📊 Vue d'ensemble</h3><p style="font-size:0.88em;color:var(--text2);margin-bottom:12px;line-height:1.6">Voici vos scores dans les 4 grands domaines des troubles dys. Plus la barre est haute, plus les difficultés rapportées sont importantes.</p><div class="bar-chart">`;
   Object.keys(DYS.dimensions).forEach(k => {
     const dim = DYS.dimensions[k];
     const score = r.dimScores[k];
-    const risk = r.risks[k];
     const pct = (score / r.dimMax * 100).toFixed(0);
     html += `<div class="bar-row">
       <div class="bar-label">${dim.icon} ${dim.name.split('(')[0].trim()}</div>
@@ -1524,22 +1606,39 @@ function renderDYSResults(r) {
   });
   html += `</div></div>`;
 
-  // Risk cards
+  // Risk cards with enriched descriptions
+  const descsEnriched = {
+    LEX: {
+      high: "Vos réponses indiquent des <strong>difficultés importantes en lecture</strong>. Cela peut se manifester par une lecture lente, des confusions de lettres ou de mots, des difficultés à comprendre un texte long, ou le besoin de relire plusieurs fois. La dyslexie touche environ 5% de la population et se compense très bien avec les bonnes stratégies. Un <strong>bilan orthophonique</strong> permettrait de poser un diagnostic clair et d'accéder à des aménagements (temps supplémentaire aux examens, outils numériques, méthodes adaptées).",
+      mod: "Certaines <strong>difficultés de lecture</strong> ressortent de vos réponses. Elles ne sont peut-être pas handicapantes au quotidien, mais elles peuvent ralentir votre apprentissage ou générer une fatigue supplémentaire lors de tâches de lecture prolongée. Si vous sentez que la lecture vous demande plus d'effort qu'aux autres, un bilan pourrait être utile pour identifier d'éventuelles compensations que vous mettez en place sans le savoir.",
+      low: "La lecture ne semble pas être une zone de difficulté particulière pour vous. Vous décodez et comprenez les textes sans effort notable. C'est un bon signe pour ce domaine."
+    },
+    ORT: {
+      high: "Vos réponses suggèrent des <strong>difficultés marquées en écriture</strong>. Cela peut concerner l'orthographe (erreurs persistantes malgré les efforts), la grammaire, l'organisation des idées à l'écrit, ou même le geste d'écriture lui-même. La dysorthographie accompagne souvent la dyslexie mais peut aussi exister seule. Un <strong>bilan orthophonique</strong> vous donnerait une vision claire et des pistes concrètes : correcteurs orthographiques, dictée vocale, méthodes de relecture structurée.",
+      mod: "Quelques <strong>difficultés d'écriture</strong> sont présentes. L'orthographe ou l'expression écrite vous demandent peut-être plus d'attention que la moyenne. Si ces difficultés vous gênent dans votre vie quotidienne ou professionnelle, un bilan permettrait de vérifier s'il existe un trouble sous-jacent et de vous proposer des outils adaptés.",
+      low: "L'écriture ne semble pas poser de problème particulier dans votre quotidien. Vous maîtrisez l'orthographe et l'expression écrite de façon satisfaisante."
+    },
+    CAL: {
+      high: "Vos réponses indiquent des <strong>difficultés significatives avec les nombres et le calcul</strong>. Cela peut se traduire par des confusions entre les chiffres, des difficultés avec le calcul mental, les notions d'espace et de temps, ou l'estimation des grandeurs. La dyscalculie touche environ 3 à 6% de la population et est encore peu connue. Un <strong>bilan neuropsychologique</strong> permettrait de mieux cerner ces difficultés et d'identifier des stratégies adaptées (supports visuels, calculatrice, applications dédiées).",
+      mod: "Certaines <strong>difficultés avec les nombres</strong> ressortent de vos réponses. Le calcul mental, les estimations ou la gestion des chiffres vous demandent peut-être un effort supplémentaire. Si cela vous gêne au quotidien (gestion du budget, courses, travail), un bilan pourrait être éclairant.",
+      low: "Les mathématiques et le calcul ne semblent pas être une zone de difficulté pour vous. Vous manipulez les chiffres avec aisance."
+    },
+    ORG: {
+      high: "Vos réponses révèlent des <strong>difficultés importantes d'organisation, de coordination ou de repérage dans l'espace</strong>. Cela peut concerner la maladresse dans les gestes, la difficulté à s'orienter, le rangement, la planification ou la coordination des mouvements. La dyspraxie (ou trouble de la coordination) affecte environ 5 à 6% des enfants, et persiste souvent à l'âge adulte. Un <strong>bilan psychomoteur</strong> vous aiderait à mieux comprendre ces difficultés et à mettre en place des aménagements pratiques.",
+      mod: "Quelques <strong>difficultés d'organisation ou de coordination</strong> sont présentes. Vous pouvez par exemple avoir du mal à planifier vos tâches, être maladroit(e) dans certaines activités manuelles, ou vous perdre facilement. Si ces difficultés impactent votre quotidien, un bilan pourrait vous apporter des pistes concrètes.",
+      low: "L'organisation et la coordination ne semblent pas poser de difficulté particulière. Vous vous repérez bien dans l'espace et coordonnez vos gestes sans problème notable."
+    }
+  };
+
   Object.keys(DYS.dimensions).forEach(k => {
     const dim = DYS.dimensions[k];
     const risk = r.risks[k];
     const score = r.dimScores[k];
-    const descs = {
-      LEX: { high: "Des difficultés significatives en lecture sont présentes. Un bilan orthophonique est recommandé.", mod: "Certaines difficultés de lecture sont notées. Un suivi pourrait être bénéfique.", low: "Peu de difficultés de lecture détectées." },
-      ORT: { high: "Des difficultés significatives en écriture sont présentes. Un bilan orthophonique est conseillé.", mod: "Certaines difficultés d'écriture sont notées.", low: "Peu de difficultés d'écriture détectées." },
-      CAL: { high: "Des difficultés significatives en calcul sont présentes. Un bilan neuropsychologique est recommandé.", mod: "Certaines difficultés en calcul sont notées.", low: "Peu de difficultés en calcul détectées." },
-      ORG: { high: "Des difficultés significatives d'organisation et de coordination sont présentes. Un bilan psychomoteur est conseillé.", mod: "Certaines difficultés d'organisation sont notées.", low: "Peu de difficultés d'organisation détectées." }
-    };
-    const desc = score >= 15 ? descs[k].high : score >= 10 ? descs[k].mod : descs[k].low;
+    const desc = score >= 15 ? descsEnriched[k].high : score >= 10 ? descsEnriched[k].mod : descsEnriched[k].low;
     html += `<div class="result-card">
       <h3>${dim.icon} ${dim.name}</h3>
       <div class="risk-badge ${risk.cls}">${risk.level}</div>
-      <p>${desc}</p>
+      <p style="font-size:0.9em;color:var(--text2);line-height:1.7;margin-top:8px">${desc}</p>
     </div>`;
   });
   return html;
@@ -1549,14 +1648,34 @@ function renderDABROWSKIResults(r) {
   const dims = DABROWSKI.dimensions;
   const domDim = dims[r.dominant];
   let html = `
+    <div class="result-card">
+      <h3>💡 Comprendre ce test</h3>
+      <p style="font-size:0.9em;color:var(--text2);line-height:1.7">
+        Les surexcitabilités de Dabrowski décrivent des <strong>intensités particulières</strong> dans la façon de vivre et de ressentir le monde.
+        Ce concept, développé par le psychiatre polonais Kazimierz Dabrowski, est souvent associé aux personnes à <strong>haut potentiel</strong> (HPI/HPE),
+        mais il concerne plus largement toute personne qui vit certaines choses "plus fort" que la moyenne.
+        Ce n'est pas un trouble — c'est une <strong>caractéristique de fonctionnement</strong>.
+        Chacun possède les 5 surexcitabilités à des degrés différents. Celles qui sont les plus développées chez vous expliquent en grande partie
+        ce qui vous passionne, ce qui vous fatigue, et ce qui vous rend unique.
+        Bien comprises et bien canalisées, ces intensités sont de véritables <strong>super-pouvoirs</strong>.
+      </p>
+    </div>
     <div class="result-card" style="text-align:center">
-      <h3>🏆 Surexcitabilité dominante</h3>
+      <h3>🏆 Votre surexcitabilité dominante</h3>
       <div style="font-size:3em;margin:8px 0">${domDim.icon}</div>
       <div style="font-family:var(--doodle);font-size:1.6em;color:${domDim.color}">${domDim.name}</div>
-      <p style="margin-top:6px">${domDim.desc}</p>
+      <p style="margin-top:8px;font-size:0.9em;color:var(--text2);line-height:1.6">${domDim.desc}</p>
+      <p style="margin-top:10px;font-size:0.9em;color:var(--text2);line-height:1.7;text-align:left">
+        ${r.dominant === 'PSY' ? 'Votre intensité dominante est <strong>physique et motrice</strong>. Vous avez probablement toujours eu besoin de bouger, d\'agir, de faire. Le repos prolongé vous pèse, et vous vous sentez le mieux quand vous êtes en mouvement ou en train d\'accomplir quelque chose de concret. Cette énergie est un moteur incroyable — mais attention à ne pas vous épuiser en oubliant de recharger vos batteries.' :
+          r.dominant === 'SEN' ? 'Votre intensité dominante est <strong>sensorielle</strong>. Vous vivez le monde à travers vos sens avec une richesse exceptionnelle. Les textures, les saveurs, les sons, les couleurs — tout cela a pour vous une intensité que beaucoup ne soupçonnent pas. Cette sensibilité vous donne accès à des plaisirs intenses, mais peut aussi vous rendre vulnérable à la surstimulation sensorielle.' :
+          r.dominant === 'INT' ? 'Votre intensité dominante est <strong>intellectuelle</strong>. Votre esprit est constamment en activité : vous questionnez, analysez, cherchez à comprendre le "pourquoi" derrière chaque chose. Vous faites naturellement des liens entre des domaines que d\'autres ne connectent pas. Cette curiosité insatiable est un formidable moteur d\'apprentissage — veillez simplement à ne pas vous perdre dans vos réflexions au point d\'oublier d\'agir.' :
+          r.dominant === 'IMA' ? 'Votre intensité dominante est <strong>imaginative</strong>. Votre monde intérieur est incroyablement riche : idées, images, scénarios, rêveries... Vous êtes naturellement créatif(ve) et inventif(ve). Cette imagination peut s\'exprimer dans l\'art, l\'écriture, la résolution de problèmes, ou simplement dans votre façon de voir les choses différemment. Mais elle peut aussi vous entraîner dans des scénarios anxieux — apprenez à canaliser cette puissance créative.' :
+          'Votre intensité dominante est <strong>émotionnelle</strong>. Vous ressentez tout avec une profondeur exceptionnelle : la joie, la tristesse, la compassion, l\'injustice... Vous êtes probablement très empathique et vous connectez facilement aux émotions des autres. Cette profondeur émotionnelle est une force relationnelle immense, mais elle peut aussi être épuisante. Apprenez à vous protéger des "éponges émotionnelles" et à faire le tri entre vos émotions et celles des autres.'}
+      </p>
     </div>
     <div class="result-card">
-      <h3>📊 Profil des surexcitabilités</h3>
+      <h3>📊 Votre profil complet</h3>
+      <p style="font-size:0.88em;color:var(--text2);margin-bottom:12px;line-height:1.6">Chaque barre représente l'intensité d'une de vos 5 surexcitabilités. Votre combinaison unique forme votre "signature d'intensité".</p>
       <div class="bar-chart">`;
   Object.keys(dims).forEach(k => {
     html += `<div class="bar-row">
@@ -1568,25 +1687,47 @@ function renderDABROWSKIResults(r) {
   html += `</div></div>
     <div class="canvas-container"><canvas id="radar-dabrowski" width="400" height="400"></canvas></div>`;
 
-  // Descriptions per OE
-  const oeDescs = {
-    PSY: "Votre énergie psychomotrice est marquée. Vous avez un besoin constant de mouvement et d'action. Canalisée positivement, cette énergie vous permet d'accomplir beaucoup de choses.",
-    SEN: "Votre sensibilité sensorielle est développée. Vous percevez le monde avec une grande intensité à travers vos sens. Cette richesse perceptive alimente votre appréciation de la beauté.",
-    INT: "Votre curiosité intellectuelle est intense. Vous cherchez à comprendre en profondeur et établissez facilement des connexions entre les idées. Cette soif de connaissances est un moteur puissant.",
-    IMA: "Votre imagination est particulièrement riche. Vous créez facilement des mondes intérieurs et utilisez la pensée visuelle. Cette créativité est une ressource précieuse.",
-    EMO: "Votre intensité émotionnelle est profonde. Vous ressentez les émotions avec une grande force et une empathie naturelle. Cette sensibilité enrichit vos relations et votre compréhension du monde."
+  // Enriched descriptions per OE with level-dependent text
+  const oeDescsEnriched = {
+    PSY: {
+      high: "Votre énergie psychomotrice est <strong>très marquée</strong>. Vous avez un besoin constant de mouvement et d'action — rester assis longtemps est probablement un calvaire ! Cette énergie débordante vous permet d'accomplir énormément de choses, mais elle peut aussi se manifester par de l'agitation, de l'impatience ou des difficultés à vous détendre. Astuce : le sport, les activités manuelles ou les balades sont vos meilleurs alliés pour canaliser cette énergie.",
+      mod: "Vous avez une bonne énergie physique, sans qu'elle soit envahissante. Vous appréciez l'action et le mouvement, mais vous savez aussi vous poser quand c'est nécessaire. Cet équilibre est un vrai atout au quotidien.",
+      low: "L'agitation physique n'est pas votre mode de fonctionnement. Vous êtes plutôt calme dans votre corps et n'avez pas un besoin impérieux de bouger en permanence. Votre énergie s'exprime davantage par d'autres canaux."
+    },
+    SEN: {
+      high: "Votre sensibilité sensorielle est <strong>particulièrement développée</strong>. Vous percevez le monde avec une grande intensité à travers vos sens : les couleurs sont plus vives, les musiques plus émouvantes, les textures plus présentes. Cette richesse perceptive fait de vous un(e) fin(e) observateur(trice) et alimente votre appréciation de la beauté sous toutes ses formes. Le revers : les environnements désagréables (bruit, odeurs, foule) vous affectent aussi plus fortement.",
+      mod: "Vous appréciez les plaisirs sensoriels — une bonne musique, un beau paysage, un repas savoureux — mais sans que cela prenne une place démesurée dans votre vie. Vos sens sont un canal d'information et de plaisir parmi d'autres.",
+      low: "Les stimulations sensorielles ne sont pas votre canal principal. Vous les appréciez, mais elles ne provoquent pas chez vous de réactions particulièrement intenses. Votre énergie se concentre sur d'autres dimensions."
+    },
+    INT: {
+      high: "Votre curiosité intellectuelle est <strong>intense et insatiable</strong>. Vous cherchez à comprendre en profondeur, vous posez des questions que d'autres ne se posent pas, et vous établissez facilement des connexions entre des idées apparemment éloignées. Vous avez probablement un goût prononcé pour la lecture, les débats d'idées ou les puzzles complexes. Cette soif de connaissances est un moteur puissant — mais elle peut aussi vous donner l'impression de ne jamais en savoir assez, ou de vous ennuyer rapidement quand un sujet est maîtrisé.",
+      mod: "Vous avez une bonne curiosité intellectuelle, active sans être envahissante. Vous aimez apprendre et comprendre, tout en sachant accepter que tout ne mérite pas une analyse en profondeur.",
+      low: "L'analyse intellectuelle poussée n'est pas votre moteur principal. Vous préférez probablement l'action concrète à la théorie, ou vous exprimez votre intelligence autrement — par la pratique, l'intuition ou la créativité."
+    },
+    IMA: {
+      high: "Votre imagination est <strong>exceptionnellement riche</strong>. Vous créez facilement des mondes intérieurs, vous visualisez des scénarios, vous inventez des histoires ou des solutions originales. Les rêveries, les métaphores et la pensée visuelle font partie intégrante de votre façon de fonctionner. Cette créativité est une ressource précieuse dans tous les domaines de la vie. Attention cependant aux scénarios catastrophe que votre imagination peut aussi produire — c'est le revers de cette puissance créative.",
+      mod: "Votre imagination est active et vous sert au quotidien, que ce soit pour résoudre des problèmes, vous projeter dans l'avenir ou simplement rêver un peu. Elle enrichit votre vie sans la dominer.",
+      low: "L'imagination n'est pas votre canal dominant. Vous êtes plutôt ancré(e) dans le concret et le réel, et vos forces s'expriment davantage dans l'action ou l'analyse que dans la rêverie."
+    },
+    EMO: {
+      high: "Votre intensité émotionnelle est <strong>profonde et puissante</strong>. Vous ressentez les émotions — les vôtres comme celles des autres — avec une force que beaucoup ne comprennent pas. La joie vous transporte, l'injustice vous révolte, la beauté vous émeut aux larmes. Vous avez probablement une empathie naturelle très développée qui fait de vous un(e) confident(e) recherché(e). Le défi : ne pas absorber les émotions des autres et apprendre à distinguer ce qui vous appartient de ce que vous captez chez les autres.",
+      mod: "Vos émotions sont bien présentes et colorent votre vie sans la submerger. Vous êtes sensible aux autres tout en gardant une certaine distance protectrice. C'est un bel équilibre entre ressenti et recul.",
+      low: "Vos émotions sont plutôt stables et contenues. Vous n'êtes pas insensible, mais les montagnes russes émotionnelles ne font pas partie de votre quotidien. Cette stabilité est un atout pour garder les idées claires dans les situations intenses."
+    }
   };
-  html += '<div class="result-card"><h3>📝 Interprétation détaillée</h3>';
+
+  html += '<div class="result-card"><h3>📝 Vos 5 intensités en détail</h3><p style="font-size:0.88em;color:var(--text2);margin-bottom:16px;line-height:1.6">Voici ce que chaque surexcitabilité signifie concrètement pour vous, avec des conseils adaptés à votre niveau.</p>';
   Object.keys(dims).forEach(k => {
     const level = r.pcts[k] >= 70 ? 'Élevée' : r.pcts[k] >= 40 ? 'Modérée' : 'Faible';
     const levelColor = r.pcts[k] >= 70 ? 'var(--accent)' : r.pcts[k] >= 40 ? 'var(--warning)' : 'var(--text2)';
-    html += `<div style="margin-bottom:12px;padding-bottom:12px;border-bottom:1px dashed #eee">
-      <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px">
+    const desc = r.pcts[k] >= 70 ? oeDescsEnriched[k].high : r.pcts[k] >= 40 ? oeDescsEnriched[k].mod : oeDescsEnriched[k].low;
+    html += `<div style="margin-bottom:14px;padding:12px;background:rgba(0,0,0,0.02);border-radius:10px;border-left:3px solid ${dims[k].color}">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px">
         <span style="font-size:1.3em">${dims[k].icon}</span>
         <strong>${dims[k].name}</strong>
         <span style="font-family:var(--doodle);color:${levelColor};font-size:0.9em">(${level} — ${r.pcts[k]}%)</span>
       </div>
-      <p style="font-size:0.85em;color:var(--text2)">${oeDescs[k]}</p>
+      <p style="font-size:0.88em;color:var(--text2);line-height:1.7">${desc}</p>
     </div>`;
   });
   html += '</div>';
